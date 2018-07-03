@@ -44,7 +44,8 @@ STATIC LIST_ENTRY mMapInfos = INITIALIZE_LIST_HEAD_VARIABLE (mMapInfos);
 //
 // ASCII names for EDKII_IOMMU_OPERATION constants, for debug logging.
 //
-STATIC CONST CHAR8 * CONST
+
+CONST CHAR8 * CONST
 mBusMasterOperationName[EdkiiIoMmuOperationMaximum] = {
   "Read",
   "Write",
@@ -53,7 +54,6 @@ mBusMasterOperationName[EdkiiIoMmuOperationMaximum] = {
   "Write64",
   "CommonBuffer64"
 };
-
 //
 // The following structure enables Map() and Unmap() to perform in-place
 // decryption and encryption, respectively, for BusMasterCommonBuffer[64]
