@@ -100,11 +100,7 @@ GetWakeupBuffer (
                   );
   ASSERT_EFI_ERROR (Status);
   if (!EFI_ERROR (Status)) {
-    Status = gBS->FreePages(
-               StartAddress,
-               EFI_SIZE_TO_PAGES (WakeupBufferSize)
-               );
-    ASSERT_EFI_ERROR (Status);
+    // DO NOT FREE THIS MEMORY POOL. WE DON'T WANT LOW MEMORY CORRUPTION !
     DEBUG ((DEBUG_INFO, "WakeupBufferStart = %x, WakeupBufferSize = %x\n",
                         (UINTN) StartAddress, WakeupBufferSize));
   } else {
