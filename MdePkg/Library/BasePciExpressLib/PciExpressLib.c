@@ -68,6 +68,25 @@ PciExpressRegisterForRuntimeAccess (
   return RETURN_UNSUPPORTED;
 }
 
+STATIC UINT64 mPciExpressBaseAddress;
+
+RETURN_STATUS
+EFIAPI
+PciExpressLibConstructor (
+  VOID
+  )
+{
+  //
+  // Cache the PciExpressBaseAddress as PCD access while scanning
+  // PCI BARs causes an assertion !
+  //
+  mPciExpressBaseAddress = PcdGet64 (PcdPciExpressBaseAddress);
+  if (!mPciExpressBaseAddress)
+    return RETURN_LOAD_ERROR;
+
+  return RETURN_SUCCESS;
+}
+
 /**
   Gets the base address of PCI Express.
 
@@ -82,7 +101,7 @@ GetPciExpressBaseAddress (
   VOID
   )
 {
-  return (VOID*)(UINTN) PcdGet64 (PcdPciExpressBaseAddress);
+  return (VOID*) (UINTN) mPciExpressBaseAddress;
 }
 
 /**
