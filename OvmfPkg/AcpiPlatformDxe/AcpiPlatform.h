@@ -25,6 +25,7 @@
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/DebugLib.h>
 #include <Library/PcdLib.h>
+#include <Library/VBoxLib/VBoxLib.h>
 
 #include <IndustryStandard/Acpi.h>
 
@@ -68,6 +69,15 @@ EFIAPI
 InstallXenTables (
   IN   EFI_ACPI_TABLE_PROTOCOL       *AcpiProtocol
   );
+
+EFI_STATUS
+EFIAPI
+InstallVBoxTables (
+  IN   EFI_ACPI_TABLE_PROTOCOL       *AcpiProtocol
+  );
+
+VOID
+FillSysTablesInfo(VOID **Tables, UINT32 TablesSize);
 
 EFI_STATUS
 EFIAPI
@@ -119,4 +129,3 @@ TransferS3ContextToBootScript (
   );
 
 #endif
-

@@ -248,6 +248,8 @@ InstallAcpiTables (
 
   if (XenDetected ()) {
     Status = InstallXenTables (AcpiTable);
+  } else if (VBoxDetected ()) {
+    Status = InstallVBoxTables (AcpiTable);
   } else {
     Status = InstallQemuFwCfgTables (AcpiTable);
   }

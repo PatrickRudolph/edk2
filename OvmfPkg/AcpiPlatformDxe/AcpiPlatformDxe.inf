@@ -35,6 +35,7 @@
   Qemu.c
   QemuFwCfgAcpi.c
   QemuLoader.h
+  VBox.c
   Xen.c
 
 [Packages]
@@ -58,6 +59,7 @@
   BaseLib
   DxeServicesTableLib
   OrderedCollectionLib
+  VBoxLib
 
 [Protocols]
   gEfiAcpiTableProtocolGuid                     # PROTOCOL ALWAYS_CONSUMED
