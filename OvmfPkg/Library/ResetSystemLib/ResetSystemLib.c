@@ -18,6 +18,7 @@
 #include <Library/DebugLib.h>
 #include <Library/IoLib.h>
 #include <Library/TimerLib.h>
+#include <Library/VBoxLib/VBoxLib.h>
 #include <OvmfPlatforms.h>
 
 #include <OvmfPlatforms.h>
@@ -33,17 +34,23 @@ AcpiPmControl (
   ASSERT (SuspendType < 6);
 
   AcpiPmBaseAddress = 0;
-  HostBridgeDevId = PciRead16 (OVMF_HOSTBRIDGE_DID);
-  switch (HostBridgeDevId) {
-  case INTEL_82441_DEVICE_ID:
-    AcpiPmBaseAddress = PIIX4_PMBA_VALUE;
-    break;
-  case INTEL_Q35_MCH_DEVICE_ID:
-    AcpiPmBaseAddress = ICH9_PMBASE_VALUE;
-    break;
-  default:
-    ASSERT (FALSE);
-    CpuDeadLoop ();
+
+  if (VBoxDetected()) {
+    AcpiPmBaseAddress = VBOX_PMBASE_VALUE;
+  } else {
+    HostBridgeDevId = PciRead16 (OVMF_HOSTBRIDGE_DID);
+
+    switch (HostBridgeDevId) {
+    case INTEL_82441_DEVICE_ID:
+      AcpiPmBaseAddress = PIIX4_PMBA_VALUE;
+      break;
+    case INTEL_Q35_MCH_DEVICE_ID:
+      AcpiPmBaseAddress = ICH9_PMBASE_VALUE;
+      break;
+    default:
+      ASSERT (FALSE);
+      CpuDeadLoop ();
+    }
   }
 
   IoBitFieldWrite16 (AcpiPmBaseAddress + 4, 10, 13, (UINT16) SuspendType);

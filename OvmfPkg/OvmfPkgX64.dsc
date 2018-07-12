@@ -760,6 +760,9 @@
   OvmfPkg/QemuRamfbDxe/QemuRamfbDxe.inf
   OvmfPkg/VirtioGpuDxe/VirtioGpu.inf
 
+  IntelFrameworkModulePkg/Bus/Pci/IdeBusDxe/IdeBusDxe.inf
+  PcAtChipsetPkg/Bus/Pci/IdeControllerDxe/IdeControllerDxe.inf
+
   #
   # ISA Support
   #

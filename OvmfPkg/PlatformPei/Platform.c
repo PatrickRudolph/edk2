@@ -34,6 +34,7 @@
 #include <Library/QemuFwCfgLib.h>
 #include <Library/QemuFwCfgS3Lib.h>
 #include <Library/ResourcePublicationLib.h>
+#include <Library/VBoxLib/VBoxLib.h>
 #include <Guid/MemoryTypeInformation.h>
 #include <Ppi/MasterBootMode.h>
 #include <IndustryStandard/Pci22.h>
@@ -182,20 +183,47 @@ MemMapInitialization (
   if (!mXen) {
     UINT32  TopOfLowRam;
     UINT64  PciExBarBase;
+    UINT64  PciExBarSize = SIZE_256MB;
     UINT32  PciBase;
     UINT32  PciSize;
 
     TopOfLowRam = GetSystemMemorySizeBelow4gb ();
     PciExBarBase = 0;
-    if (mHostBridgeDevId == INTEL_Q35_MCH_DEVICE_ID) {
+    if (VBoxDetected()) {
+      UINT64  McfgBase;
+      UINT64  McfgSize;
+
+      //
+      // Physical address of PCI config space MMIO region
+      //
+      VBoxGetVmVariable(EFI_INFO_INDEX_MCFG_BASE, (CHAR8 *)&McfgBase,
+                        sizeof(McfgBase));
+      VBoxGetVmVariable(EFI_INFO_INDEX_MCFG_SIZE, (CHAR8 *)&McfgSize,
+                        sizeof(McfgSize));
+      DEBUG ((EFI_D_INFO, "%a McfgBase 0x%x\n", __FUNCTION__, McfgBase));
+      DEBUG ((EFI_D_INFO, "%a McfgSize 0x%x\n", __FUNCTION__, McfgSize));
+
+      if (McfgBase > 0) {
+        PciExBarBase = McfgBase;
+        PciExBarSize = McfgSize;
+
+        ASSERT (TopOfLowRam <= PciExBarBase);
+        ASSERT (PciExBarBase > BASE_4GB || PciExBarBase <= MAX_UINT32 - PciExBarSize);
+        ASSERT (PciExBarBase > BASE_4GB || PciExBarBase <= 0xFC000000 - McfgSize);
+
+        PcdSet64S (PcdPciExpressBaseAddress, PciExBarBase);
+      }
+
+      PciBase = (TopOfLowRam < BASE_2GB) ? BASE_2GB : TopOfLowRam;
+    } else if (mHostBridgeDevId == INTEL_Q35_MCH_DEVICE_ID) {
       //
       // The MMCONFIG area is expected to fall between the top of low RAM and
       // the base of the 32-bit PCI host aperture.
       //
       PciExBarBase = PcdGet64 (PcdPciExpressBaseAddress);
       ASSERT (TopOfLowRam <= PciExBarBase);
-      ASSERT (PciExBarBase <= MAX_UINT32 - SIZE_256MB);
-      PciBase = (UINT32)(PciExBarBase + SIZE_256MB);
+      ASSERT (PciExBarBase <= MAX_UINT32 - PciExBarSize);
+      PciBase = (UINT32)(PciExBarBase + PciExBarSize);
     } else {
       PciBase = (TopOfLowRam < BASE_2GB) ? BASE_2GB : TopOfLowRam;
     }
@@ -213,6 +241,11 @@ MemMapInitialization (
     // 0xFED20000    gap                          896 KB
     // 0xFEE00000    LAPIC                          1 MB
     //
+    if (VBoxDetected()) {
+      if (TopOfLowRam < PciBase)
+        AddIoMemoryRangeHob (TopOfLowRam, PciBase);
+    }
+
     PciSize = 0xFC000000 - PciBase;
     AddIoMemoryBaseSizeHob (PciBase, PciSize);
     PcdStatus = PcdSet64S (PcdPciMmio32Base, PciBase);
@@ -245,8 +278,8 @@ MemMapInitialization (
       // is most definitely not RAM; so, as an exception, cover it with
       // uncacheable reserved memory right here.
       //
-      AddReservedMemoryBaseSizeHob (PciExBarBase, SIZE_256MB, FALSE);
-      BuildMemoryAllocationHob (PciExBarBase, SIZE_256MB,
+      AddReservedMemoryBaseSizeHob (PciExBarBase, PciExBarSize, FALSE);
+      BuildMemoryAllocationHob (PciExBarBase, PciExBarSize,
         EfiReservedMemoryType);
     }
     AddIoMemoryBaseSizeHob (PcdGet32(PcdCpuLocalApicBaseAddress), SIZE_1MB);
@@ -417,6 +450,10 @@ MiscInitialization (
       PmCmd      = POWER_MGMT_REGISTER_PIIX4 (PCI_COMMAND_OFFSET);
       Pmba       = POWER_MGMT_REGISTER_PIIX4 (PIIX4_PMBA);
       PmbaAndVal = ~(UINT32)PIIX4_PMBA_MASK;
+      if (VBoxDetectedPiiX3())
+        PmbaOrVal = VBOX_PMBASE_VALUE;
+      else
+        PmbaOrVal  = PIIX4_PMBA_VALUE;
       PmbaOrVal  = PIIX4_PMBA_VALUE;
       AcpiCtlReg = POWER_MGMT_REGISTER_PIIX4 (PIIX4_PMREGMISC);
       AcpiEnBit  = PIIX4_PMREGMISC_PMIOSE;
@@ -425,7 +462,10 @@ MiscInitialization (
       PmCmd      = POWER_MGMT_REGISTER_Q35 (PCI_COMMAND_OFFSET);
       Pmba       = POWER_MGMT_REGISTER_Q35 (ICH9_PMBASE);
       PmbaAndVal = ~(UINT32)ICH9_PMBASE_MASK;
-      PmbaOrVal  = ICH9_PMBASE_VALUE;
+      if (VBoxDetectedICH9())
+        PmbaOrVal = VBOX_PMBASE_VALUE;
+      else
+        PmbaOrVal  = ICH9_PMBASE_VALUE;
       AcpiCtlReg = POWER_MGMT_REGISTER_Q35 (ICH9_ACPI_CNTL);
       AcpiEnBit  = ICH9_ACPI_CNTL_ACPI_EN;
       break;
@@ -441,8 +481,12 @@ MiscInitialization (
   //
   // If the appropriate IOspace enable bit is set, assume the ACPI PMBA
   // has been configured (e.g., by Xen) and skip the setup here.
+  // On VBox the enable bit is set, but PMBA hasn't been configured.
   // This matches the logic in AcpiTimerLibConstructor ().
   //
+  if (VBoxDetected())
+    PciAnd8(AcpiCtlReg, ~AcpiEnBit);
+
   if ((PciRead8 (AcpiCtlReg) & AcpiEnBit) == 0) {
     //
     // The PEI phase should be exited with fully accessibe ACPI PM IO space:
@@ -472,8 +516,10 @@ MiscInitialization (
 
     //
     // Set PCI Express Register Range Base Address
+    // Skip on VBox ICH9 as it isn't configurable.
     //
-    PciExBarInitialization ();
+    if (!VBoxDetectedICH9())
+      PciExBarInitialization ();
   }
 }
 
@@ -649,6 +695,12 @@ InitializePlatform (
   // Query Host Bridge DID
   //
   mHostBridgeDevId = PciRead16 (OVMF_HOSTBRIDGE_DID);
+
+  //
+  // Quirk: There's no hostbridge on VBox ICH9.
+  //
+  if (VBoxDetectedICH9())
+    mHostBridgeDevId = INTEL_Q35_MCH_DEVICE_ID;
 
   if (FeaturePcdGet (PcdSmmSmramRequire)) {
     Q35TsegMbytesInitialization ();

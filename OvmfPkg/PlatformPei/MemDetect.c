@@ -37,6 +37,7 @@ Module Name:
 #include <Library/ResourcePublicationLib.h>
 #include <Library/MtrrLib.h>
 #include <Library/QemuFwCfgLib.h>
+#include <Library/VBoxLib/VBoxLib.h>
 
 #include "Platform.h"
 #include "Cmos.h"
@@ -229,7 +230,6 @@ GetSystemMemorySizeBelow4gb (
 
   return (UINT32) (((UINTN)((Cmos0x35 << 8) + Cmos0x34) << 16) + SIZE_16MB);
 }
-
 
 STATIC
 UINT64
@@ -532,6 +532,8 @@ PublishPeiMemory (
     //
     LowerMemorySize -= mQ35TsegMbytes * SIZE_1MB;
   }
+  if (VBoxDetected()) // protect pre-installed ACPI tables, DXE will parse it
+    LowerMemorySize -= SIZE_64KB;
 
   //
   // If S3 is supported, then the S3 permanent PEI memory is placed next,
@@ -704,6 +706,137 @@ QemuInitializeRam (
 }
 
 /**
+  Peform Memory Detection for VBOX
+
+**/
+STATIC
+VOID
+VBoxInitializeRam (
+  VOID
+  )
+{
+  UINT64                      LowerMemorySize;
+  UINT64                      UpperMemorySize;
+  MTRR_SETTINGS               MtrrSettings;
+  EFI_STATUS                  Status;
+
+  DEBUG ((EFI_D_INFO, "%a called\n", __FUNCTION__));
+
+  //
+  // Determine total memory size available
+  //
+  LowerMemorySize = GetSystemMemorySizeBelow4gb ();
+  UpperMemorySize = GetSystemMemorySizeAbove4gb ();
+
+  if (mBootMode == BOOT_ON_S3_RESUME) {
+    //
+    // Create the following memory HOB as an exception on the S3 boot path.
+    //
+    // Normally we'd create memory HOBs only on the normal boot path. However,
+    // CpuMpPei specifically needs such a low-memory HOB on the S3 path as
+    // well, for "borrowing" a subset of it temporarily, for the AP startup
+    // vector.
+    //
+    // CpuMpPei saves the original contents of the borrowed area in permanent
+    // PEI RAM, in a backup buffer allocated with the normal PEI services.
+    // CpuMpPei restores the original contents ("returns" the borrowed area) at
+    // End-of-PEI. End-of-PEI in turn is emitted by S3Resume2Pei before
+    // transferring control to the OS's wakeup vector in the FACS.
+    //
+    // We expect any other PEIMs that "borrow" memory similarly to CpuMpPei to
+    // restore the original contents. Furthermore, we expect all such PEIMs
+    // (CpuMpPei included) to claim the borrowed areas by producing memory
+    // allocation HOBs, and to honor preexistent memory allocation HOBs when
+    // looking for an area to borrow.
+    //
+    AddMemoryRangeHob (0, BASE_512KB + BASE_128KB);
+  } else {
+    //
+    // Create memory HOBs
+    //
+    AddMemoryRangeHob (0, BASE_512KB + BASE_128KB);
+    AddReservedMemoryBaseSizeHob(BASE_512KB + BASE_128KB,
+                                 BASE_1MB - (BASE_512KB + BASE_128KB), 0);
+
+    if (FeaturePcdGet (PcdSmmSmramRequire)) {
+      UINT32 TsegSize;
+
+      TsegSize = mQ35TsegMbytes * SIZE_1MB;
+      AddMemoryRangeHob (BASE_1MB, LowerMemorySize - TsegSize);
+      AddReservedMemoryBaseSizeHob (LowerMemorySize - TsegSize, TsegSize,
+        TRUE);
+      //
+      // This is the memory range used by ACPI
+      //
+      BuildMemoryAllocationHob (
+        LowerMemorySize - TsegSize - SIZE_64KB,
+        SIZE_64KB,
+        EfiACPIReclaimMemory
+        );
+    } else {
+      AddMemoryRangeHob (BASE_1MB, LowerMemorySize);
+      //
+      // This is the memory range used by ACPI
+      //
+      BuildMemoryAllocationHob (
+        LowerMemorySize - SIZE_64KB,
+        SIZE_64KB,
+        EfiACPIReclaimMemory
+        );
+    }
+
+    if (UpperMemorySize != 0) {
+      AddMemoryBaseSizeHob (BASE_4GB, UpperMemorySize);
+    }
+  }
+
+  //
+  // We'd like to keep the following ranges uncached:
+  // - [640 KB, 1 MB)
+  // - [LowerMemorySize, 4 GB)
+  //
+  // Everything else should be WB. Unfortunately, programming the inverse (ie.
+  // keeping the default UC, and configuring the complement set of the above as
+  // WB) is not reliable in general, because the end of the upper RAM can have
+  // practically any alignment, and we may not have enough variable MTRRs to
+  // cover it exactly.
+  //
+  if (IsMtrrSupported ()) {
+    MtrrGetAllMtrrs (&MtrrSettings);
+
+    //
+    // MTRRs disabled, fixed MTRRs disabled, default type is uncached
+    //
+    ASSERT ((MtrrSettings.MtrrDefType & BIT11) == 0);
+    ASSERT ((MtrrSettings.MtrrDefType & BIT10) == 0);
+    ASSERT ((MtrrSettings.MtrrDefType & 0xFF) == 0);
+
+    //
+    // flip default type to writeback
+    //
+    SetMem (&MtrrSettings.Fixed, sizeof MtrrSettings.Fixed, 0x06);
+    ZeroMem (&MtrrSettings.Variables, sizeof MtrrSettings.Variables);
+    MtrrSettings.MtrrDefType |= BIT11 | BIT10 | 6;
+    MtrrSetAllMtrrs (&MtrrSettings);
+
+    //
+    // Set memory range from 640KB to 1MB to uncacheable
+    //
+    Status = MtrrSetMemoryAttribute (BASE_512KB + BASE_128KB,
+               BASE_1MB - (BASE_512KB + BASE_128KB), CacheUncacheable);
+    ASSERT_EFI_ERROR (Status);
+
+    //
+    // Set memory range from the "top of lower RAM" (RAM below 4GB) to 4GB as
+    // uncacheable
+    //
+    Status = MtrrSetMemoryAttribute (LowerMemorySize,
+               SIZE_4GB - LowerMemorySize, CacheUncacheable);
+    ASSERT_EFI_ERROR (Status);
+  }
+}
+
+/**
   Publish system RAM and reserve memory regions
 
 **/
@@ -712,7 +845,9 @@ InitializeRamRegions (
   VOID
   )
 {
-  if (!mXen) {
+  if (VBoxDetected()) {
+    VBoxInitializeRam ();
+  } else if (!mXen) {
     QemuInitializeRam ();
   } else {
     XenPublishRamRegions ();

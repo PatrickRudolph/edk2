@@ -33,6 +33,7 @@
 //
 #define PIIX4_PMBA_VALUE  0xB000
 #define ICH9_PMBASE_VALUE 0x0600
+#define VBOX_PMBASE_VALUE 0x4000
 
 //
 // Common bits in same-purpose registers
