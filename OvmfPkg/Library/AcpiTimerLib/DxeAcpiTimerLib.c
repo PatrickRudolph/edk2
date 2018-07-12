@@ -16,6 +16,7 @@
 #include <Library/IoLib.h>
 #include <Library/PcdLib.h>
 #include <Library/PciLib.h>
+#include <Library/VBoxLib/VBoxLib.h>
 #include <OvmfPlatforms.h>
 
 //
@@ -51,7 +52,18 @@ AcpiTimerLibConstructor (
   HostBridgeDevId = PcdGet16 (PcdOvmfHostBridgePciDevId);
   switch (HostBridgeDevId) {
     case INTEL_82441_DEVICE_ID:
-      Pmba = POWER_MGMT_REGISTER_PIIX4 (PIIX4_PMBA);
+      if (PciRead16(POWER_MGMT_REGISTER_PIIX4(0)) == 0x8086 &&
+          PciRead16(POWER_MGMT_REGISTER_PIIX4(2)) == 0x7113) {
+        Pmba       = POWER_MGMT_REGISTER_PIIX4 (PIIX4_PMBA);
+      } else if (PciRead16(POWER_MGMT_REGISTER_VBOX(0)) == 0x8086 &&
+                 PciRead16(POWER_MGMT_REGISTER_VBOX(2)) ==
+                 INTEL_82371AB_ACPI_DEVICE_ID) {
+        Pmba       = POWER_MGMT_REGISTER_VBOX (PIIX4_PMBA);
+      } else {
+        DEBUG ((EFI_D_ERROR, "%a: Unknown POWER_MGMT device\n", __FUNCTION__));
+        ASSERT (FALSE);
+        return RETURN_UNSUPPORTED;
+      }
       break;
     case INTEL_Q35_MCH_DEVICE_ID:
       Pmba = POWER_MGMT_REGISTER_Q35 (ICH9_PMBASE);

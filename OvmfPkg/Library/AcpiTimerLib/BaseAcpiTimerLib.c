@@ -15,6 +15,7 @@
 #include <Library/DebugLib.h>
 #include <Library/IoLib.h>
 #include <Library/PciLib.h>
+#include <Library/VBoxLib/VBoxLib.h>
 #include <OvmfPlatforms.h>
 
 //
@@ -46,18 +47,39 @@ AcpiTimerLibConstructor (
   // Query Host Bridge DID to determine platform type
   //
   HostBridgeDevId = PciRead16 (OVMF_HOSTBRIDGE_DID);
+
+  //
+  // Quirk: There's no hostbridge on VBox ICH9.
+  //
+  if (VBoxDetectedICH9())
+      HostBridgeDevId = INTEL_Q35_MCH_DEVICE_ID;
+
   switch (HostBridgeDevId) {
     case INTEL_82441_DEVICE_ID:
-      Pmba       = POWER_MGMT_REGISTER_PIIX4 (PIIX4_PMBA);
+      if (PciRead16(POWER_MGMT_REGISTER_PIIX4(0)) == 0x8086 &&
+         PciRead16(POWER_MGMT_REGISTER_PIIX4(2)) == 0x7113) {
+        Pmba       = POWER_MGMT_REGISTER_PIIX4 (PIIX4_PMBA);
+        AcpiCtlReg = POWER_MGMT_REGISTER_PIIX4 (PIIX4_PMREGMISC);
+        PmbaOrVal  = PIIX4_PMBA_VALUE;
+      } else if (VBoxDetectedPiiX3()) {
+        Pmba       = POWER_MGMT_REGISTER_VBOX (PIIX4_PMBA);
+        AcpiCtlReg = POWER_MGMT_REGISTER_VBOX (PIIX4_PMREGMISC);
+        PmbaOrVal  = VBOX_PMBASE_VALUE;
+      } else {
+        DEBUG ((EFI_D_ERROR, "%a: Unknown POWER_MGMT device\n", __FUNCTION__));
+        ASSERT (FALSE);
+        return RETURN_UNSUPPORTED;
+      }
       PmbaAndVal = ~(UINT32)PIIX4_PMBA_MASK;
-      PmbaOrVal  = PIIX4_PMBA_VALUE;
-      AcpiCtlReg = POWER_MGMT_REGISTER_PIIX4 (PIIX4_PMREGMISC);
       AcpiEnBit  = PIIX4_PMREGMISC_PMIOSE;
       break;
     case INTEL_Q35_MCH_DEVICE_ID:
       Pmba       = POWER_MGMT_REGISTER_Q35 (ICH9_PMBASE);
       PmbaAndVal = ~(UINT32)ICH9_PMBASE_MASK;
-      PmbaOrVal  = ICH9_PMBASE_VALUE;
+      if (VBoxDetectedICH9())
+        PmbaOrVal  = VBOX_PMBASE_VALUE;
+      else
+        PmbaOrVal  = ICH9_PMBASE_VALUE;
       AcpiCtlReg = POWER_MGMT_REGISTER_Q35 (ICH9_ACPI_CNTL);
       AcpiEnBit  = ICH9_ACPI_CNTL_ACPI_EN;
       break;
@@ -66,6 +88,13 @@ AcpiTimerLibConstructor (
         __FUNCTION__, HostBridgeDevId));
       ASSERT (FALSE);
       return RETURN_UNSUPPORTED;
+  }
+
+  //
+  // On VBox the enable bit is set, but PMBA hasn't been configured.
+  //
+  if (VBoxDetected()) {
+    PciAnd8(AcpiCtlReg, ~AcpiEnBit);
   }
 
   //

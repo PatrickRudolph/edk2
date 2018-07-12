@@ -36,3 +36,4 @@
   BaseLib
   PciLib
   IoLib
+  VBoxLib
