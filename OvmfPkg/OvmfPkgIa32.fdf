@@ -236,6 +236,10 @@ INF  OvmfPkg/XenPvBlkDxe/XenPvBlkDxe.inf
 INF  OvmfPkg/VBoxVgaDxe/VBoxVgaDxe.inf
 INF  OvmfPkg/VBoxVgaMiniPortDxe/VBoxVgaMiniPortDxe.inf
 
+INF  OvmfPkg/VBoxAppleSim/VBoxAppleSim.inf
+ # we need it for VBoxAppleSim
+INF  IntelFrameworkModulePkg/Universal/DataHubDxe/DataHubDxe.inf
+
 !if $(SECURE_BOOT_ENABLE) == TRUE
   INF  SecurityPkg/VariableAuthenticated/SecureBootConfigDxe/SecureBootConfigDxe.inf
 !endif

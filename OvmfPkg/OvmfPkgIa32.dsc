@@ -754,6 +754,9 @@
     <LibraryClasses>
       PcdLib|MdePkg/Library/DxePcdLib/DxePcdLib.inf
   }
+  OvmfPkg/VBoxAppleSim/VBoxAppleSim.inf
+# we need it for VBoxAppleSim
+  IntelFrameworkModulePkg/Universal/DataHubDxe/DataHubDxe.inf
   OvmfPkg/VBoxVgaMiniPortDxe/VBoxVgaMiniPortDxe.inf
 
   IntelFrameworkModulePkg/Bus/Pci/IdeBusDxe/IdeBusDxe.inf
