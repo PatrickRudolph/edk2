@@ -78,6 +78,7 @@
   gQemuRamfbGuid                      = {0x557423a1, 0x63ab, 0x406c, {0xbe, 0x7e, 0x91, 0xcd, 0xbc, 0x08, 0xc4, 0x57}}
   gXenBusRootDeviceGuid               = {0xa732241f, 0x383d, 0x4d9c, {0x8a, 0xe1, 0x8e, 0x09, 0x83, 0x75, 0x89, 0xd7}}
   gRootBridgesConnectedEventGroupGuid = {0x24a2d66f, 0xeedd, 0x4086, {0x90, 0x42, 0xf2, 0x6e, 0x47, 0x97, 0xee, 0x69}}
+  gVBoxVgaPkgTokenSpaceGuid           = { 0xa3a8ce56, 0x4a07, 0x441f, {0xa3, 0xf5, 0x6f, 0x53, 0xdb, 0x9c, 0xb7, 0xd8}}
 
 [Protocols]
   gVirtioDeviceProtocolGuid           = {0xfa920010, 0x6785, 0x4941, {0xb6, 0xec, 0x49, 0x8c, 0x57, 0x9f, 0x16, 0x0a}}
@@ -122,6 +123,8 @@
   gUefiOvmfPkgTokenSpaceGuid.PcdGuidedExtractHandlerTableSize|0x0|UINT32|0x1a
   gUefiOvmfPkgTokenSpaceGuid.PcdOvmfDecompressionScratchEnd|0x0|UINT32|0x1f
 
+  gVBoxVgaPkgTokenSpaceGuid.PcdDriverSupportedEfiVersion|0x0002000a|UINT32|0x00010003
+
 [PcdsDynamic, PcdsDynamicEx]
   gUefiOvmfPkgTokenSpaceGuid.PcdEmuVariableEvent|0|UINT64|2
   gUefiOvmfPkgTokenSpaceGuid.PcdOvmfFlashVariablesEnable|FALSE|BOOLEAN|0x10
@@ -164,3 +167,6 @@
   #  runtime OS from tampering with firmware structures (special memory ranges
   #  used by OVMF, the varstore pflash chip, LockBox etc).
   gUefiOvmfPkgTokenSpaceGuid.PcdSmmSmramRequire|FALSE|BOOLEAN|0x1e
+
+  gVBoxVgaPkgTokenSpaceGuid.PcdSupportGop|TRUE|BOOLEAN|0x00010004
+  gVBoxVgaPkgTokenSpaceGuid.PcdSupportUga|FALSE|BOOLEAN|0x00010005
