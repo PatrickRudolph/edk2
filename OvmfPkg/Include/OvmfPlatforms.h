@@ -20,6 +20,7 @@
 #include <IndustryStandard/Pci22.h>
 #include <IndustryStandard/Q35MchIch9.h>
 #include <IndustryStandard/I440FxPiix4.h>
+#include <IndustryStandard/VBox/VBox.h>
 
 //
 // OVMF Host Bridge DID Address
