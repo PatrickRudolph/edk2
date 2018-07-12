@@ -234,6 +234,7 @@ INF  OvmfPkg/XenIoPciDxe/XenIoPciDxe.inf
 INF  OvmfPkg/XenBusDxe/XenBusDxe.inf
 INF  OvmfPkg/XenPvBlkDxe/XenPvBlkDxe.inf
 INF  OvmfPkg/VBoxVgaDxe/VBoxVgaDxe.inf
+INF  OvmfPkg/VBoxVgaMiniPortDxe/VBoxVgaMiniPortDxe.inf
 
 !if $(SECURE_BOOT_ENABLE) == TRUE
   INF  SecurityPkg/VariableAuthenticated/SecureBootConfigDxe/SecureBootConfigDxe.inf

@@ -763,6 +763,7 @@
     <LibraryClasses>
       PcdLib|MdePkg/Library/DxePcdLib/DxePcdLib.inf
   }
+  OvmfPkg/VBoxVgaMiniPortDxe/VBoxVgaMiniPortDxe.inf
 
   IntelFrameworkModulePkg/Bus/Pci/IdeBusDxe/IdeBusDxe.inf
   PcAtChipsetPkg/Bus/Pci/IdeControllerDxe/IdeControllerDxe.inf
