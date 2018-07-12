@@ -128,7 +128,6 @@ InstallAllStructures (
                        &SmbiosHandle,
                        (EFI_SMBIOS_TABLE_HEADER*) SmbiosTable.Raw
                        );
-    ASSERT_EFI_ERROR (Status);
 
     if (SmbiosTable.Hdr->Type == 0) {
       NeedSmbiosType0 = FALSE;
@@ -193,9 +192,13 @@ SmbiosTablePublishEntry (
   }
 
   //
-  // Add Xen or QEMU SMBIOS data if found
+  // Add VBox, Xen or QEMU SMBIOS data if found
   //
-  EntryPointStructure = GetXenSmbiosTables ();
+  if (VBoxDetected ())
+    EntryPointStructure = GetVBoxSmbiosTables();
+  else
+    EntryPointStructure = GetXenSmbiosTables();
+
   if (EntryPointStructure != NULL) {
     SmbiosTables = (UINT8*)(UINTN)EntryPointStructure->TableAddress;
   } else {

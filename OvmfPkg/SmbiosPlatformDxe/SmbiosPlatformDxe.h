@@ -26,6 +26,7 @@
 #include <Library/BaseMemoryLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/MemoryAllocationLib.h>
+#include <Library/VBoxLib/VBoxLib.h>
 
 
 /**
@@ -39,6 +40,16 @@ GetXenSmbiosTables (
   VOID
   );
 
+/**
+  Locates the VBox SMBIOS data if it exists
+
+  @return SMBIOS_TABLE_ENTRY_POINT   Address of VBox SMBIOS data
+
+**/
+SMBIOS_TABLE_ENTRY_POINT *
+GetVBoxSmbiosTables (
+  VOID
+  );
 
 /**
   Locates and extracts the QEMU SMBIOS table data if present in fw_cfg

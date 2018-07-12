@@ -32,6 +32,7 @@
   SmbiosPlatformDxe.h
   SmbiosPlatformDxe.c
   Qemu.c
+  VBox.c
 
 [Sources.IA32, Sources.X64]
   X86Xen.c
@@ -54,6 +55,7 @@
   QemuFwCfgLib
   MemoryAllocationLib
   PcdLib
+  VBoxLib
 
 [Pcd]
   gUefiOvmfPkgTokenSpaceGuid.PcdQemuSmbiosValidated
@@ -66,4 +68,3 @@
 
 [Depex]
   gEfiSmbiosProtocolGuid
-
