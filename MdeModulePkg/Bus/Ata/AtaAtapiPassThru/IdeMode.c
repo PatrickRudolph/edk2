@@ -2396,7 +2396,7 @@ DetectAndConfigIdeDevice (
     //
     IdeWritePortB (PciIo, IdeRegisters->CmdOrStatus, ATA_CMD_EXEC_DRIVE_DIAG);
 
-    Status = WaitForBSYClear (PciIo, IdeRegisters, 350000000);
+    Status = WaitForBSYClear (PciIo, IdeRegisters, 3500);
     if (EFI_ERROR (Status)) {
       DEBUG((EFI_D_ERROR, "New detecting method: Send Execute Diagnostic Command: WaitForBSYClear: Status: %d\n", Status));
       continue;
