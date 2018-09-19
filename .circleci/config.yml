@@ -1,0 +1,433 @@
+version: 2
+jobs:
+  build0:
+    docker:
+      - image: "debian:stretch"
+    steps:
+      - run:
+          name: Installing git and SSH
+          command: 'apt-get update && apt-get install -y git ssh'
+      - checkout
+      - run:
+          name: Update submodules
+          command: 'git submodule update --init --recursive && git pull --recurse-submodules && git submodule update --recursive'
+      - run:
+          name: Checking out HEAD~0
+          command: 'git checkout HEAD~0'
+      - run:
+          name: Update submodules
+          command: 'git submodule update --init --recursive'
+      - run:
+          name: Installing GCC, build tools, python
+          command: 'apt-get update && apt-get install -y gcc g++ build-essential python nasm uuid-dev acpica-tools libc6-dev-i386'
+      - run:
+          name: Build basetools
+          command: 'make -C BaseTools'
+      - run:
+          name: Build X64
+          command: 'source ./edksetup.sh && build -n 2 -DSECURE_BOOT_ENABLE=TRUE -DDEBUG_ON_SERIAL_PORT=TRUE -DFD_SIZE_2MB=TRUE -t GCC49 -a X64 -p OvmfPkg/OvmfPkgX64.dsc -b DEBUG'
+
+  build1:
+    docker:
+      - image: "debian:stretch"
+    steps:
+      - run:
+          name: Installing git and SSH
+          command: 'apt-get update && apt-get install -y git ssh'
+      - checkout
+      - run:
+          name: Update submodules
+          command: 'git submodule update --init --recursive && git pull --recurse-submodules && git submodule update --recursive'
+      - run:
+          name: Checking out HEAD~1
+          command: 'git checkout HEAD~1'
+      - run:
+          name: Update submodules
+          command: 'git submodule update --init --recursive'
+      - run:
+          name: Installing GCC, build tools, python
+          command: 'apt-get update && apt-get install -y gcc g++ build-essential python nasm uuid-dev acpica-tools libc6-dev-i386'
+      - run:
+          name: Build basetools
+          command: 'make -C BaseTools'
+      - run:
+          name: Build X64
+          command: 'source ./edksetup.sh && build -n 2 -DSECURE_BOOT_ENABLE=TRUE -DDEBUG_ON_SERIAL_PORT=TRUE -DFD_SIZE_2MB=TRUE -t GCC49 -a X64 -p OvmfPkg/OvmfPkgX64.dsc -b DEBUG'
+
+  build2:
+    docker:
+      - image: "debian:stretch"
+    steps:
+      - run:
+          name: Installing git and SSH
+          command: 'apt-get update && apt-get install -y git ssh'
+      - checkout
+      - run:
+          name: Update submodules
+          command: 'git submodule update --init --recursive && git pull --recurse-submodules && git submodule update --recursive'
+      - run:
+          name: Checking out HEAD~2
+          command: 'git checkout HEAD~2'
+      - run:
+          name: Update submodules
+          command: 'git submodule update --init --recursive'
+      - run:
+          name: Installing GCC, build tools, python
+          command: 'apt-get update && apt-get install -y gcc g++ build-essential python nasm uuid-dev acpica-tools libc6-dev-i386'
+      - run:
+          name: Build basetools
+          command: 'make -C BaseTools'
+      - run:
+          name: Build X64
+          command: 'source ./edksetup.sh && build -n 2 -DSECURE_BOOT_ENABLE=TRUE -DDEBUG_ON_SERIAL_PORT=TRUE -DFD_SIZE_2MB=TRUE -t GCC49 -a X64 -p OvmfPkg/OvmfPkgX64.dsc -b DEBUG'
+
+  build3:
+    docker:
+      - image: "debian:stretch"
+    steps:
+      - run:
+          name: Installing git and SSH
+          command: 'apt-get update && apt-get install -y git ssh'
+      - checkout
+      - run:
+          name: Update submodules
+          command: 'git submodule update --init --recursive && git pull --recurse-submodules && git submodule update --recursive'
+      - run:
+          name: Checking out HEAD~3
+          command: 'git checkout HEAD~3'
+      - run:
+          name: Update submodules
+          command: 'git submodule update --init --recursive'
+      - run:
+          name: Installing GCC, build tools, python
+          command: 'apt-get update && apt-get install -y gcc g++ build-essential python nasm uuid-dev acpica-tools libc6-dev-i386'
+      - run:
+          name: Build basetools
+          command: 'make -C BaseTools'
+      - run:
+          name: Build X64
+          command: 'source ./edksetup.sh && build -n 2 -DSECURE_BOOT_ENABLE=TRUE -DDEBUG_ON_SERIAL_PORT=TRUE -DFD_SIZE_2MB=TRUE -t GCC49 -a X64 -p OvmfPkg/OvmfPkgX64.dsc -b DEBUG'
+
+  build4:
+    docker:
+      - image: "debian:stretch"
+    steps:
+      - run:
+          name: Installing git and SSH
+          command: 'apt-get update && apt-get install -y git ssh'
+      - checkout
+      - run:
+          name: Update submodules
+          command: 'git submodule update --init --recursive && git pull --recurse-submodules && git submodule update --recursive'
+      - run:
+          name: Checking out HEAD~4
+          command: 'git checkout HEAD~4'
+      - run:
+          name: Update submodules
+          command: 'git submodule update --init --recursive'
+      - run:
+          name: Installing GCC, build tools, python
+          command: 'apt-get update && apt-get install -y gcc g++ build-essential python nasm uuid-dev acpica-tools libc6-dev-i386'
+      - run:
+          name: Build basetools
+          command: 'make -C BaseTools'
+      - run:
+          name: Build X64
+          command: 'source ./edksetup.sh && build -n 2 -DSECURE_BOOT_ENABLE=TRUE -DDEBUG_ON_SERIAL_PORT=TRUE -DFD_SIZE_2MB=TRUE -t GCC49 -a X64 -p OvmfPkg/OvmfPkgX64.dsc -b DEBUG'
+
+  build5:
+    docker:
+      - image: "debian:stretch"
+    steps:
+      - run:
+          name: Installing git and SSH
+          command: 'apt-get update && apt-get install -y git ssh'
+      - checkout
+      - run:
+          name: Update submodules
+          command: 'git submodule update --init --recursive && git pull --recurse-submodules && git submodule update --recursive'
+      - run:
+          name: Checking out HEAD~5
+          command: 'git checkout HEAD~5'
+      - run:
+          name: Update submodules
+          command: 'git submodule update --init --recursive'
+      - run:
+          name: Installing GCC, build tools, python
+          command: 'apt-get update && apt-get install -y gcc g++ build-essential python nasm uuid-dev acpica-tools libc6-dev-i386'
+      - run:
+          name: Build basetools
+          command: 'make -C BaseTools'
+      - run:
+          name: Build X64
+          command: 'source ./edksetup.sh && build -n 2 -DSECURE_BOOT_ENABLE=TRUE -DDEBUG_ON_SERIAL_PORT=TRUE -DFD_SIZE_2MB=TRUE -t GCC49 -a X64 -p OvmfPkg/OvmfPkgX64.dsc -b DEBUG'
+
+  build6:
+    docker:
+      - image: "debian:stretch"
+    steps:
+      - run:
+          name: Installing git and SSH
+          command: 'apt-get update && apt-get install -y git ssh'
+      - checkout
+      - run:
+          name: Update submodules
+          command: 'git submodule update --init --recursive && git pull --recurse-submodules && git submodule update --recursive'
+      - run:
+          name: Checking out HEAD~6
+          command: 'git checkout HEAD~6'
+      - run:
+          name: Update submodules
+          command: 'git submodule update --init --recursive'
+      - run:
+          name: Installing GCC, build tools, python
+          command: 'apt-get update && apt-get install -y gcc g++ build-essential python nasm uuid-dev acpica-tools libc6-dev-i386'
+      - run:
+          name: Build basetools
+          command: 'make -C BaseTools'
+      - run:
+          name: Build X64
+          command: 'source ./edksetup.sh && build -n 2 -DSECURE_BOOT_ENABLE=TRUE -DDEBUG_ON_SERIAL_PORT=TRUE -DFD_SIZE_2MB=TRUE -t GCC49 -a X64 -p OvmfPkg/OvmfPkgX64.dsc -b DEBUG'
+
+  build7:
+    docker:
+      - image: "debian:stretch"
+    steps:
+      - run:
+          name: Installing git and SSH
+          command: 'apt-get update && apt-get install -y git ssh'
+      - checkout
+      - run:
+          name: Update submodules
+          command: 'git submodule update --init --recursive && git pull --recurse-submodules && git submodule update --recursive'
+      - run:
+          name: Checking out HEAD~7
+          command: 'git checkout HEAD~7'
+      - run:
+          name: Update submodules
+          command: 'git submodule update --init --recursive'
+      - run:
+          name: Installing GCC, build tools, python
+          command: 'apt-get update && apt-get install -y gcc g++ build-essential python nasm uuid-dev acpica-tools libc6-dev-i386'
+      - run:
+          name: Build basetools
+          command: 'make -C BaseTools'
+      - run:
+          name: Build X64
+          command: 'source ./edksetup.sh && build -n 2 -DSECURE_BOOT_ENABLE=TRUE -DDEBUG_ON_SERIAL_PORT=TRUE -DFD_SIZE_2MB=TRUE -t GCC49 -a X64 -p OvmfPkg/OvmfPkgX64.dsc -b DEBUG'
+
+  build8:
+    docker:
+      - image: "debian:stretch"
+    steps:
+      - run:
+          name: Installing git and SSH
+          command: 'apt-get update && apt-get install -y git ssh'
+      - checkout
+      - run:
+          name: Update submodules
+          command: 'git submodule update --init --recursive && git pull --recurse-submodules && git submodule update --recursive'
+      - run:
+          name: Checking out HEAD~8
+          command: 'git checkout HEAD~8'
+      - run:
+          name: Update submodules
+          command: 'git submodule update --init --recursive'
+      - run:
+          name: Installing GCC, build tools, python
+          command: 'apt-get update && apt-get install -y gcc g++ build-essential python nasm uuid-dev acpica-tools libc6-dev-i386'
+      - run:
+          name: Build basetools
+          command: 'make -C BaseTools'
+      - run:
+          name: Build X64
+          command: 'source ./edksetup.sh && build -n 2 -DSECURE_BOOT_ENABLE=TRUE -DDEBUG_ON_SERIAL_PORT=TRUE -DFD_SIZE_2MB=TRUE -t GCC49 -a X64 -p OvmfPkg/OvmfPkgX64.dsc -b DEBUG'
+
+  build9:
+    docker:
+      - image: "debian:stretch"
+    steps:
+      - run:
+          name: Installing git and SSH
+          command: 'apt-get update && apt-get install -y git ssh'
+      - checkout
+      - run:
+          name: Update submodules
+          command: 'git submodule update --init --recursive && git pull --recurse-submodules && git submodule update --recursive'
+      - run:
+          name: Checking out HEAD~9
+          command: 'git checkout HEAD~9'
+      - run:
+          name: Update submodules
+          command: 'git submodule update --init --recursive'
+      - run:
+          name: Installing GCC, build tools, python
+          command: 'apt-get update && apt-get install -y gcc g++ build-essential python nasm uuid-dev acpica-tools libc6-dev-i386'
+      - run:
+          name: Build basetools
+          command: 'make -C BaseTools'
+      - run:
+          name: Build X64
+          command: 'source ./edksetup.sh && build -n 2 -DSECURE_BOOT_ENABLE=TRUE -DDEBUG_ON_SERIAL_PORT=TRUE -DFD_SIZE_2MB=TRUE -t GCC49 -a X64 -p OvmfPkg/OvmfPkgX64.dsc -b DEBUG'
+
+  build10:
+    docker:
+      - image: "debian:stretch"
+    steps:
+      - run:
+          name: Installing git and SSH
+          command: 'apt-get update && apt-get install -y git ssh'
+      - checkout
+      - run:
+          name: Update submodules
+          command: 'git submodule update --init --recursive && git pull --recurse-submodules && git submodule update --recursive'
+      - run:
+          name: Checking out HEAD~10
+          command: 'git checkout HEAD~10'
+      - run:
+          name: Update submodules
+          command: 'git submodule update --init --recursive'
+      - run:
+          name: Installing GCC, build tools, python
+          command: 'apt-get update && apt-get install -y gcc g++ build-essential python nasm uuid-dev acpica-tools libc6-dev-i386'
+      - run:
+          name: Build basetools
+          command: 'make -C BaseTools'
+      - run:
+          name: Build X64
+          command: 'source ./edksetup.sh && build -n 2 -DSECURE_BOOT_ENABLE=TRUE -DDEBUG_ON_SERIAL_PORT=TRUE -DFD_SIZE_2MB=TRUE -t GCC49 -a X64 -p OvmfPkg/OvmfPkgX64.dsc -b DEBUG'
+
+  build11:
+    docker:
+      - image: "debian:stretch"
+    steps:
+      - run:
+          name: Installing git and SSH
+          command: 'apt-get update && apt-get install -y git ssh'
+      - checkout
+      - run:
+          name: Update submodules
+          command: 'git submodule update --init --recursive && git pull --recurse-submodules && git submodule update --recursive'
+      - run:
+          name: Checking out HEAD~11
+          command: 'git checkout HEAD~11'
+      - run:
+          name: Update submodules
+          command: 'git submodule update --init --recursive'
+      - run:
+          name: Installing GCC, build tools, python
+          command: 'apt-get update && apt-get install -y gcc g++ build-essential python nasm uuid-dev acpica-tools libc6-dev-i386'
+      - run:
+          name: Build basetools
+          command: 'make -C BaseTools'
+      - run:
+          name: Build X64
+          command: 'source ./edksetup.sh && build -n 2 -DSECURE_BOOT_ENABLE=TRUE -DDEBUG_ON_SERIAL_PORT=TRUE -DFD_SIZE_2MB=TRUE -t GCC49 -a X64 -p OvmfPkg/OvmfPkgX64.dsc -b DEBUG'
+
+  build12:
+    docker:
+      - image: "debian:stretch"
+    steps:
+      - run:
+          name: Installing git and SSH
+          command: 'apt-get update && apt-get install -y git ssh'
+      - checkout
+      - run:
+          name: Update submodules
+          command: 'git submodule update --init --recursive && git pull --recurse-submodules && git submodule update --recursive'
+      - run:
+          name: Checking out HEAD~12
+          command: 'git checkout HEAD~12'
+      - run:
+          name: Update submodules
+          command: 'git submodule update --init --recursive'
+      - run:
+          name: Installing GCC, build tools, python
+          command: 'apt-get update && apt-get install -y gcc g++ build-essential python nasm uuid-dev acpica-tools libc6-dev-i386'
+      - run:
+          name: Build basetools
+          command: 'make -C BaseTools'
+      - run:
+          name: Build X64
+          command: 'source ./edksetup.sh && build -n 2 -DSECURE_BOOT_ENABLE=TRUE -DDEBUG_ON_SERIAL_PORT=TRUE -DFD_SIZE_2MB=TRUE -t GCC49 -a X64 -p OvmfPkg/OvmfPkgX64.dsc -b DEBUG'
+
+  build13:
+    docker:
+      - image: "debian:stretch"
+    steps:
+      - run:
+          name: Installing git and SSH
+          command: 'apt-get update && apt-get install -y git ssh'
+      - checkout
+      - run:
+          name: Update submodules
+          command: 'git submodule update --init --recursive && git pull --recurse-submodules && git submodule update --recursive'
+      - run:
+          name: Checking out HEAD~13
+          command: 'git checkout HEAD~13'
+      - run:
+          name: Update submodules
+          command: 'git submodule update --init --recursive'
+      - run:
+          name: Installing GCC, build tools, python
+          command: 'apt-get update && apt-get install -y gcc g++ build-essential python nasm uuid-dev acpica-tools libc6-dev-i386'
+      - run:
+          name: Build basetools
+          command: 'make -C BaseTools'
+      - run:
+          name: Build X64
+          command: 'source ./edksetup.sh && build -n 2 -DSECURE_BOOT_ENABLE=TRUE -DDEBUG_ON_SERIAL_PORT=TRUE -DFD_SIZE_2MB=TRUE -t GCC49 -a X64 -p OvmfPkg/OvmfPkgX64.dsc -b DEBUG'
+
+  build14:
+    docker:
+      - image: "debian:stretch"
+    steps:
+      - run:
+          name: Installing git and SSH
+          command: 'apt-get update && apt-get install -y git ssh'
+      - checkout
+      - run:
+          name: Update submodules
+          command: 'git submodule update --init --recursive && git pull --recurse-submodules && git submodule update --recursive'
+      - run:
+          name: Checking out HEAD~14
+          command: 'git checkout HEAD~14'
+      - run:
+          name: Update submodules
+          command: 'git submodule update --init --recursive'
+      - run:
+          name: Installing GCC, build tools, python
+          command: 'apt-get update && apt-get install -y gcc g++ build-essential python nasm uuid-dev acpica-tools libc6-dev-i386'
+      - run:
+          name: Build basetools
+          command: 'make -C BaseTools'
+      - run:
+          name: Build X64
+          command: 'source ./edksetup.sh && build -n 2 -DSECURE_BOOT_ENABLE=TRUE -DDEBUG_ON_SERIAL_PORT=TRUE -DFD_SIZE_2MB=TRUE -t GCC49 -a X64 -p OvmfPkg/OvmfPkgX64.dsc -b DEBUG'
+
+  test:
+    docker:
+      - image: circleci/<language>:<version TAG>
+    steps:
+      - checkout
+      - run: <command>
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build0
+      - build1
+      - build2
+      - build3
+      - build4
+      - build5
+      - build6
+      - build7
+      - build8
+      - build9
+      - build10
+      - build11
+      - build12
+      - build13
+      - build14
